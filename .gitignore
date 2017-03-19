@@ -1,4 +1,5 @@
-static/*.min.*
-static/vue.js
+*.min.*
+vue.js
+fonts/
 .vscode
 *.swp
