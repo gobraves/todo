@@ -15,7 +15,7 @@ class DevelopmentConfig(Config):
     'mysql+pymysql://neo:1023@localhost/todo'
 
 config = {
-    'development' : DevelopmentConfig
+    'development' : DevelopmentConfig,
     'default' : DevelopmentConfig
 }
 

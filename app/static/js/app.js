@@ -3,16 +3,8 @@
    var vue = new Vue({
         el: '#app',
 
-        data: {
-            tasks: [],
-            newTask: {
-                title: '',
-                description: ''
-            }
-        },
-
         created: function() {
-            this.$http.get('/tasks').then(function(res) {
+            this.$http.get('/users/'++'/tasks').then(function(res) {
                 this.tasks = res.data.tasks ? res.data.tasks : [];
             });
         },
@@ -29,7 +21,7 @@
 
                 this.newTask.done = false;
 
-                this.$http.post('/addTask', this.newTask).then(function(res) {
+                this.$http.post('/tasks/', this.newTask).then(function(res) {
                     this.newTask.id = res.data.tasks.length;
                     this.tasks.push(this.newTask);
 
@@ -43,7 +35,7 @@
             },
 
             deleteTask: function(index) {
-                this.$http.delete('/deleteTask/' + index).then(function(res) {
+                this.$http.delete('/tasks/' + index).then(function(res) {
                     this.$http.get('/tasks').then(function(res) {
                         this.tasks = res.data.tasks ? res.data.tasks : [];
                     });
@@ -57,7 +49,7 @@
                     task.done = true;
                 }
 
-                this.$http.put('/task', task).then(function(res) {
+                this.$http.put('/tasks/' + task.id, task).then(function(res) {
                     this.$http.get('/tasks').then(function(res) {
                         this.tasks = res.data.tasks ? res.data.tasks : [];
                     });
