@@ -15,7 +15,7 @@
 	<script src="/jquery.min.js"></script>
 	<script src="/bootstrap.min.js"></script>
 	<script src="/vue.js"></script>
-	<script src="/vue-resource.js"></script>
+	<script src="/vue-resource.min.js"></script>
 </head>
 <body>
 
@@ -26,7 +26,6 @@
 
 				<div class="input-group">
 					<input type="text" class="form-control" placeholder="New Task" v-on:keyup.enter="createTask" v-model="newTask.title" autofocus>
-                    <textarea type="text" v-model="newTask.description"></textarea>
 					<button class="btn btn-primary" type="button" v-on:click="createTask">Create</button>
 				</div>
 

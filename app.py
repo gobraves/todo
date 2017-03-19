@@ -8,13 +8,11 @@ tasks = [
     {
         'id': 1,
         'title': u'Buy groceries',
-        'description': u'Milk, Cheese, Pizza, Fruit, Tylenol',
         'done': False
     },
     {
         'id': 2,
         'title': u'Learn Python',
-        'description': u'Need to find a good Python tutorial on the web',
         'done': False
     }
 ]
@@ -48,7 +46,6 @@ def add_task():
     task = {
         'id' : tasks[len(tasks) - 1]['id'] + 1,
         'title': request.json['title'],
-        'description' : request.json.get('description', ''),
         'done' : False
     }
     tasks.append(task)
@@ -69,15 +66,17 @@ def delete_task(index):
     return jsonify({'tasks': tasks}), 201
 
 
-@app.route('/task', methods=['GET', 'PUT'])
+@app.route('/task', methods=['PUT'])
 def update_task():
     """
-    更新数据项
+    修改数据项
     """
     task_id = request.json['id']
+    print(task_id)
     for task in tasks:
         if task['id'] == task_id:
-            task = update_task
+            task['title'] =  request.json['title'],
+            task['done'] = request.json['done']
 
 
 @app.errorhandler(404)
