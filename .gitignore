@@ -4,3 +4,4 @@ fonts/
 .vscode
 *.swp
 .idea
+__pycache__/
