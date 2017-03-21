@@ -1,7 +1,6 @@
 from flask import url_for, current_app
 from app.exceptions import ValidationError
-from . import db
-from . import api
+from . import api, db
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, SignatureExpired, BadSignature
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -9,20 +8,24 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(8), nullable=False)
-    password_hash = db.Column(db.String(32), nullable=False)
+    username = db.Column(db.String(50), nullable=False)
+    password_hash = db.Column(db.String(100), nullable=False)
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password(password)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
     def generate_auth_token(self, expiration=600):
-        s = Serializer(api.config['SECRET_KEY'], expires_in=expiration)
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
         return s.dumps({'id': self.id})
 
     @staticmethod
     def verify_auth_token(token):
-        s = Serializer(api.config['SECRET_KEY'])
+        s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
         except SignatureExpired:
@@ -73,10 +76,15 @@ class User(db.Model):
 
 class Task(db.Model):
     __tablename__ = 'tasks'
-    id = db.Column(db.Intefer, primary_key=True, nullable=False)
-    user_id = db.Column(db.Interger, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
     title = db.Column(db.String(32), nullable=False)
     done = db.Column(db.Boolean, default=False)
+
+    def __init__(self, user_id, title, done):
+        self.user_id = user_id
+        self.title = title
+        self.done = done 
 
     def __repr__(self):
         return '<Task {}>'.format(self.title)
@@ -84,14 +92,16 @@ class Task(db.Model):
     @staticmethod
     def from_json(task):
         title = task.get('title')
+        user_id = task.get('user_id')
+        done = task.get('done')
         if title is None or title == '':
             raise ValidationError('task does not have a title')
-        return Task(title=title)
+        return Task(title=title, user_id=user_id, done=done)
 
     def to_json(self):
         json_task = {
-            'url': url_for('api.get_task', id=self.id, _external=True),
-            'user': url_for('api.get_user', id=self.user_id, _external=True),
+            'id': self.id,
+            'user_id': self.user_id,
             'title': self.title,
             'done': self.done
         }

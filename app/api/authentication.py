@@ -1,51 +1,42 @@
-from flask import g, jsonify, request
+from flask import g, jsonify, request, url_for
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from flask_httpauth import HTTPBasicAuth
 from .errors import unauthorized, forbidden
 from . import api
 from ..models import User
 
-auth = HTTPBasicAuth()
-
-
-@auth.verify_password()
-def verify_password(username_or_token, password):
-    if username_or_token == '':
-        return False;
-    if password == '':
-        g.current_user = User.verify_auth_token(username_or_token)
-        g.token_used = True
-        return g.current_user is not None
-    user = User.query.filter_by(username_or_token).first()
-    if not user:
-        return False
-    g.current_user = user
-    g.token_used = False
-    return user.verify_password(password)
-
-
 @api.before_request
-@auth.login_required()
 def before_request():
-    url = request.url
-    if url == "/users":
-        return "log in"
+    path = request.path
+    print(path)
+    # bypass token url path
+    if not (path.startswith(api.url_prefix)
+            and not path.startswith(
+                url_for("%s.%s" % (api.name, "get_token")))):
+        return None
     token = request.headers['Authorization']
-
     if not token:
-        return forbidden("Unconfirmed account")
-    s = Serializer(api.config['SECRET_KEY'])
-    data = s.load(token)
-    user = User.query.filter_by(data.get('id'))
+        return forbidden("Request without a token")
+    user = User.verify_auth_token(token)
     if not user:
-        return forbidden("Unconfirmed account")
+        return forbidden("Unconfirmed account" + path)
+
     g.current_user = user
     g.token_used = True
 
 
-@api.route('/token')
+@api.route('/token', methods=['POST'])
 def get_token():
-    if g.current_user.is_anonymous or g.token_used:
+    username = request.json["username"]
+    password = request.json["password"]
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return unauthorized('User ' + username + ' doesn\'t exist.')
+    if not user.verify_password(password):
         return unauthorized('Invalid credentials')
-    return jsonify({'token': g.current_user.generate_auth_token(
-        expiration=3600), 'expiration': 3600})
+    # return user and token as json
+    userData = {
+        "id": user.id,
+        "username": user.username,
+        "token": user.generate_auth_token().decode()
+    }
+    return jsonify(userData)

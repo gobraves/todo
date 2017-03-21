@@ -4,18 +4,19 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>To Do</title>
 
-	<link rel="stylesheet" href="/css/bootstrap.min.css">
-    <link rel="stylesheet"  href="/css/font-awesome.min.css">
+	<link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet"  href="static/css/font-awesome.min.css">
     <!--
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.7.0/vue-resource.min.js"></script>
 	-->
-	<script src="/js/jquery.min.js"></script>
-	<script src="/js/bootstrap.min.js"></script>
-	<script src="/js/vue.js"></script>
-	<script src="/js/vue-resource.min.js"></script>
+	<script src="static/js/jquery.min.js"></script>
+	<script src="static/js/bootstrap.min.js"></script>
+	<script src="static/js/vue.js"></script>
+	<script src="static/js/vue-resource.js"></script>
+	<link rel="stylesheet" href="static/css/app.css">
 </head>
 <body>
     <nav class="navbar navbar-default">
@@ -38,6 +39,7 @@
         </div>
     </nav>
 	<div class="container" id="app">
+		<div v-if="isLogin">
 		<div class="row">
 			<div class="col-md-8">
 				<h1>My Tasks</h1>
@@ -89,8 +91,42 @@
 				</div>
 			</div>
 		</div>
+		</div> <!-- end App -->
+		<!-- begin Login -->
+		<div v-if="!isLogin">
+			<div class="row">
+				<div class="col-md-offset-4 col-md-4">
+					<form>
+						<div class="form-group">
+							<input type="username" class="form-control" v-model="user.username" placeholder="用户名">
+						</div>
+						<div class="form-group">
+							<input type="password" class="form-control" v-model="user.password"  placeholder="密码">
+						</div>
+						<button type="button" @click="login()" class="btn btn-default">登陆</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<!-- end Login -->
+		<!-- toast -->
+		<div class="toast" v-if="toast.show">
+			<p>{{toast.message}}</p>
+		</div>
 	</div>
 
-<script type="text/javascript" src="/js/app.js"></script>
+<style type="text/css">
+#flask_error_page {
+	display: none;
+}
+#flask_error_page>iframe {
+	border: none;
+	border-top: solid 10px red;
+	width: 100%;
+	min-height: 900px;
+}
+</style>
+<div id="flask_error_page"></div>
+<script type="text/javascript" src="static/js/app.js"></script>
 </body>
 </html>
